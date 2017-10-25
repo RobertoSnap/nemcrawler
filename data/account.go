@@ -3,6 +3,7 @@ package data
 import (
 	"github.com/robertosnap/nemcrawler/models"
 	"encoding/json"
+	"strconv"
 )
 
 func GetNamespaceMosaicDefinitionPage(namespace string) models.NamespaceMosaicDefinitionPage {
@@ -10,8 +11,15 @@ func GetNamespaceMosaicDefinitionPage(namespace string) models.NamespaceMosaicDe
 	b := Get("/namespace/mosaic/definition/page?namespace=" + namespace)
 	json.Unmarshal(b, &m)
 	return m
-
 }
+
+func GetAccountMosaicOwned(address string) models.AccountMosaicOwned {
+	m := models.AccountMosaicOwned{}
+	b := Get("/account/mosaic/owned?address=" + address)
+	json.Unmarshal(b, &m)
+	return m
+}
+
 
 func GetAccountFromPublicKey(publicKey string) models.AccountFromPublicKey {
 	m := models.AccountFromPublicKey{}
@@ -20,9 +28,36 @@ func GetAccountFromPublicKey(publicKey string) models.AccountFromPublicKey {
 	return m
 }
 
-func GetAccountTransfersOutgoing(address string) models.AccountTransfersOutgoing {
+func GetAccountTransfersOutgoing(address string, hash string, id int) models.AccountTransfersOutgoing {
+	query := "/account/transfers/outgoing?address=" + address
+	if hash != "" {
+		query = query + "&hash=" + hash
+	}
+
+	if id != 0 {
+		query = query + "&id=" + strconv.Itoa(id)
+	}
 	m := models.AccountTransfersOutgoing{}
-	b := Get("/account/transfers/outgoing?address=" + address)
+	b := Get(query)
 	json.Unmarshal(b, &m)
 	return m
+}
+
+func GetAccountTransfersOutgoingAll(address string) models.AccountTransfersOutgoing {
+
+	transactions := GetAccountTransfersOutgoing(address, "", 0)
+	lastHash := transactions.Data[ len(transactions.Data)-1 ].Meta.Hash.Data
+	complete := false
+	n := models.AccountTransfersOutgoing{}
+	for complete == false {
+		n = GetAccountTransfersOutgoing(address, lastHash, 0)
+		lastHash = transactions.Data[ len(transactions.Data)-1 ].Meta.Hash.Data
+		if len(n.Data) == 0 {
+			complete = true
+		}
+		transactions.Data = append(transactions.Data, n.Data...)
+		//fmt.Println(lastHash)
+	}
+	return transactions
+
 }

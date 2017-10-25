@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mosaic Crawler</title>
+    <script type="text/javascript" src="node_modules/vis/dist/vis.js"></script>
+    <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="node_modules/vis/dist/vis-network.min.css">
+    <style type="text/css">
+        #mynetwork {
+            width: 600px;
+            height: 400px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<h1>Mosaic Crawler</h1>
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    // create an array with nodes
+    var nodes = new vis.DataSet([
+        {id: 1, label: 'Node 1'},
+        {id: 2, label: 'Node 2'},
+        {id: 3, label: 'Node 3'},
+        {id: 4, label: 'Node 4'},
+        {id: 5, label: 'Node 5'}
+    ]);
+    var JSON;
+    $.getJSON('data/banco_coin.json', function (response) {
+        JSON = response;
+        $(window).trigger('JSONready');
+    });
+
+    var nodes = new vis.DataSet([
+        {
+            "Count": 1,
+            "id": "TDENCY5ZGWHZZBPQ6HOBZKTEI3WPJXNKEZR3G7IH",
+            "Amount": 750000,
+            "Receivers": [
+                {
+                    "Address": "TCDBQETTBKI5YVHS56XBFQKNFRVNELAXIGCGIEK6",
+                    "Amount": 50000
+                },
+                {
+                    "Address": "TD4SAQFGF3DP3IJAXJA2GYGQ3HZVD3AS3UIZ44EA",
+                    "Amount": 50000
+                },
+                {
+                    "Address": "TCFUWU42GFZ3C3UIWQK4KA6RSXTE7MZRZ2SBCENI",
+                    "Amount": 50000
+                },
+                {
+                    "Address": "TCJUFAQYOHO7DM3PB7GIIMNYY7JNNCEXHMOTTPY7",
+                    "Amount": 50000
+                },
+                {
+                    "Address": "TCRE2YAZ7DWF4WL5BU3VPZ2ZWFHD6WGIKRG26IZO",
+                    "Amount": 50000
+                }
+            ]
+        },
+        {
+            "Count": 2,
+            "id": "TCDBQETTBKI5YVHS56XBFQKNFRVNELAXIGCGIEK6",
+            "Amount": 25000,
+            "Receivers": [
+                {
+                    "Address": "TDWWYDGQNBKSAJBSHZX7QWVX7WNVAWWB7HGPWRB2",
+                    "Amount": 25000
+                }
+            ]
+        },
+        {
+            "Count": 2,
+            "id": "TD4SAQFGF3DP3IJAXJA2GYGQ3HZVD3AS3UIZ44EA",
+            "Amount": 50000,
+            "Receivers": null
+        },
+        {
+            "Count": 2,
+            "id": "TCFUWU42GFZ3C3UIWQK4KA6RSXTE7MZRZ2SBCENI",
+            "Amount": 50000,
+            "Receivers": null
+        },
+        {
+            "Count": 2,
+            "id": "TCJUFAQYOHO7DM3PB7GIIMNYY7JNNCEXHMOTTPY7",
+            "Amount": 50000,
+            "Receivers": null
+        },
+        {
+            "Count": 2,
+            "id": "TCRE2YAZ7DWF4WL5BU3VPZ2ZWFHD6WGIKRG26IZO",
+            "Amount": 0,
+            "Receivers": [
+                {
+                    "Address": "TDWWYDGQNBKSAJBSHZX7QWVX7WNVAWWB7HGPWRB2",
+                    "Amount": 25000
+                },
+                {
+                    "Address": "TAVISI7ETMVMS2C7CN6V2X6AUUGZQYVJ7GLZYP5O",
+                    "Amount": 25000
+                }
+            ]
+        },
+        {
+            "Count": 3,
+            "id": "TDWWYDGQNBKSAJBSHZX7QWVX7WNVAWWB7HGPWRB2",
+            "Amount": 50000,
+            "Receivers": null
+        },
+        {
+            "Count": 3,
+            "id": "TDWWYDGQNBKSAJBSHZX7QWVX7WNVAWWB7HGPWRB2",
+            "Amount": 50000,
+            "Receivers": null
+        },
+        {
+            "Count": 3,
+            "id": "TAVISI7ETMVMS2C7CN6V2X6AUUGZQYVJ7GLZYP5O",
+            "Amount": 25000,
+            "Receivers": null
+        }
+    ]);
+
+    // create an array with edges
+    var edges = new vis.DataSet([
+        {from: 1, to: 3},
+        {from: 1, to: 2},
+        {from: 2, to: 4},
+        {from: 2, to: 5}
+    ]);
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {
+        autoResize: true,
+        height: '100%',
+        width: '100%',
+        nodes: {
+            color: '#ff0000',
+            fixed: false,
+            font: '12px arial red',
+            scaling: {
+                label: true
+            },
+            shadow: true
+        }
+    }
+
+    // initialize your network!
+    $.Event('JSONready', function () {
+        var network = new vis.Network(container, data, options);
+    });
+
+</script>
+
+
+</body>
+</html>

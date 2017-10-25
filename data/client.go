@@ -5,7 +5,8 @@ import (
 	"io/ioutil"
 )
 
-var NemNodeUrl = "http://alice5.nem.ninja:7890"
+//var NemNodeUrl = "http://alice5.nem.ninja:7890"
+var NemNodeUrl = "http://192.3.61.243:7890"
 
 func Get(endpoint string) []byte {
 	resp, err := http.Get(getNode() + endpoint)
