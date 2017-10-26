@@ -44,10 +44,12 @@ func GetAccountTransfersOutgoing(address string, hash string, id int) models.Acc
 }
 
 func GetAccountTransfersOutgoingAll(address string) models.AccountTransfersOutgoing {
-
-	transactions := GetAccountTransfersOutgoing(address, "", 0)
-	lastHash := transactions.Data[ len(transactions.Data)-1 ].Meta.Hash.Data
 	complete := false
+	transactions := GetAccountTransfersOutgoing(address, "", 0)
+	if len(transactions.Data) == 0 {
+		return transactions
+	}
+	lastHash := transactions.Data[ len(transactions.Data)-1 ].Meta.Hash.Data
 	n := models.AccountTransfersOutgoing{}
 	for complete == false {
 		n = GetAccountTransfersOutgoing(address, lastHash, 0)

@@ -12,8 +12,9 @@ import (
 
 func main() {
 	//runCrawler("dim", "coin")
-	runCrawler("banco", "coin")
-	//runCrawler("nemventory.product", "beginners_fishing_rod")
+	//runCrawler("dim", "coin")
+	runCrawler("nemventory.product", "beginners_fishing_rod")
+	//runCrawler("breeze", "breeze-token")
 
 }
 type mosaicCrawler struct {
@@ -22,6 +23,38 @@ type mosaicCrawler struct {
 	Creator       string
 	Address       string
 	InitialSupply int
+}
+
+type Edges []edge
+
+type edge struct{
+	From string `json:"from"`
+	To string `json:"to"`
+}
+
+type waveParams struct {
+	Address string
+	Quantity int
+	Count int
+}
+
+type AllWaves []waveTrans
+
+type allData struct {
+	AllWaves `json:"nodes"`
+	Edges `json:"edges"`
+}
+
+type waveTrans struct {
+	Count int `json:"group"`
+	Sender string `json:"address"`
+	Amount int `json:"value"`
+	Receivers []transferTrans
+}
+
+type transferTrans struct {
+	Address string
+	Amount int
 }
 
 func runCrawler(namespace string, mosaic string) {
@@ -36,44 +69,55 @@ func runCrawler(namespace string, mosaic string) {
 
 	//Wave 1
 	w1 := initWave(m)
-	all := append(allWaves{}, w1)
+	all := AllWaves{}
+	all = append(AllWaves{}, w1)
 
 	//Wave 2
-	w2 := startWaveing(w1,m)
+	w2 := startWaveing(w1,m, all)
 	all = append(all, w2...)
 
 	//Wave 3
 	for _,w := range all {
 		if w.Count == 2 {
-			all = append(all, startWaveing(w,m)...)
+			all = append(all, startWaveing(w,m,all)...)
 		}
 	}
 
 	//Wave 4
 	for _,w := range all {
 		if w.Count == 3 {
-			all = append(all, startWaveing(w,m)...)
+			all = append(all, startWaveing(w,m,all)...)
 		}
 	}
 
+	Edges := Edges{}
+	/*Create Edges*/
+	for _,w := range all {
+		for _,k := range w.Receivers {
+			Edges = append(Edges, edge{
+				From: w.Sender,
+				To: k.Address,
+			})
 
-	/*w3 := startWaveing(w2,m)
-	all = append(all, w3...)*/
+		}
+	}
+
+	allData := allData{
+		AllWaves: all,
+		Edges: Edges,
+	}
 
 
 
+	/*Print to file*/
+	fmt.Printf("\n %+v \n", allData)
 
-
-
-
-	fmt.Printf("\n %+v \n", all)
-
-	result, err := json2.Marshal(all)
+	result, err := json2.Marshal(allData)
 	if err != nil {
 		fmt.Println("Problem when converting result to JSON", err)
 		os.Exit(1)
 	}
-	filename :=  m.Namespace + "_" + m.Mosaic+".json"
+	filename :=  "public/data/"+m.Namespace + "_" + m.Mosaic+".json"
 	err = ioutil.WriteFile(filename, result, 0666)
 
 	//Save the mosaic transactions
@@ -81,18 +125,12 @@ func runCrawler(namespace string, mosaic string) {
 }
 
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
 
-type allWaves []waveTrans
 
-func startWaveing(w waveTrans, m mosaicCrawler) allWaves {
+func startWaveing(w waveTrans, m mosaicCrawler, allWaves AllWaves) AllWaves {
 	newWaveCount := w.Count + 1
 
-	newWaves := allWaves{}
+	newWaves := AllWaves{}
 
 	for _,r := range w.Receivers {
 		allTransactions := data.GetAccountTransfersOutgoingAll(r.Address)
@@ -101,6 +139,18 @@ func startWaveing(w waveTrans, m mosaicCrawler) allWaves {
 			Quantity: r.Amount,
 			Count: newWaveCount,
 		}
+		//Check if sender has been used before
+		for _,z := range allWaves  {
+			if z.Sender == r.Address {
+				continue
+			}
+		}
+		for _,g := range newWaves  {
+			if g.Sender == r.Address {
+				continue
+			}
+		}
+
 		newWaves = append(newWaves, newWave(m, allTransactions,newWaveParams) )
 	}
 
@@ -122,23 +172,6 @@ func initWave(m mosaicCrawler) waveTrans{
 }
 
 
-type waveParams struct {
-	Address string
-	Quantity int
-	Count int
-}
-
-type waveTrans struct {
-	Count int
-	Sender string
-	Amount int
-	Receivers []transferTrans
-}
-
-type transferTrans struct {
-	Address string
-	Amount int
-}
 
 func newWave(m mosaicCrawler, a models.AccountTransfersOutgoing, params waveParams) waveTrans {
 	w := waveTrans{

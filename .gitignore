@@ -1,2 +1,4 @@
 .idea
 /.idea
+/public/data
+/public/node_modules
