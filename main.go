@@ -9,8 +9,8 @@ import (
 	"io/ioutil"
 )
 
-var Namespace string = "banco"
-var Mosaic string = "coin"
+var Namespace string = "nemventory.product"
+var Mosaic string = "beginners_fishing_rod"
 var depth = 3
 
 func main() {
@@ -24,8 +24,8 @@ func main() {
 }
 
 type network struct {
-	nodes nodes
-	edges edges
+	Nodes nodes `json:"nodes"`
+	Edges edges `json:"edges"`
 }
 type nodes []node
 type node struct {
@@ -51,12 +51,12 @@ func run () {
 	n.addNode(address, waveCount)
 
 	waveCount++
-	for _,e := range n.edges{
+	for _,e := range n.Edges {
 		n.addNode(e.To, waveCount)
 	}
 	for waveCount <= depth {
 		waveCount++
-		for _,e := range n.edges{
+		for _,e := range n.Edges {
 			if(e.Wave == waveCount-1){
 				n.addNode(e.To, waveCount)
 			}
@@ -80,8 +80,8 @@ func run () {
 func (n *network)addNode(address string, wave int) {
 	var nodeExist bool
 
-	//Check that this account does is not allready added to nodes list.
-	for _,node := range n.nodes {
+	//Check that this account does is not allready added to Nodes list.
+	for _,node := range n.Nodes {
 		if node.Address == address{
 			nodeExist = true
 		}
@@ -93,7 +93,7 @@ func (n *network)addNode(address string, wave int) {
 
 	if ! nodeExist {
 		//Create the node
-		n.nodes = append(n.nodes,node{
+		n.Nodes = append(n.Nodes,node{
 			Address: address,
 			Wave: wave,
 			Label: address,
@@ -101,7 +101,7 @@ func (n *network)addNode(address string, wave int) {
 		})
 	}
 
-	//Add edges
+	//Add Edges
 	n.addEdges(address, amount, wave)
 }
 
@@ -141,7 +141,7 @@ func (n *network)addEdges(address string, totalAmountOwn int, wave int){
 
 
 func (n *network)addEdge( addressFrom string, addressTo string, amount int, wave int) {
-	n.edges = append(n.edges,edge{
+	n.Edges = append(n.Edges,edge{
 		From: addressFrom,
 		To: addressTo,
 		Transfer: amount,

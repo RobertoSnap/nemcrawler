@@ -7,7 +7,12 @@
 $(document).ready(function (){
 
     var JSON;
-    $.getJSON('data/breeze_breeze-token.json', function (response) {
+    //var dataset = 'data/breeze-breeze-token.json';
+    //var dataset = 'data/banco-coin.json';
+   // var dataset = 'data/dim-coin.json';
+    var dataset = 'data/nemventory.product-beginners_fishing_rod.json';
+
+    $.getJSON(dataset, function (response) {
         JSON = response;
         console.log(JSON);
         $(window).trigger('JSONready');
@@ -33,6 +38,9 @@ $(document).ready(function (){
             autoResize: true,
             height: '100%',
             width: '100%',
+            configure: {
+                container: document.getElementById('config'),
+            },
             nodes: {
                 shape: "triangle",
             },
@@ -41,7 +49,7 @@ $(document).ready(function (){
             },
         };
         var network = new vis.Network(
-            document.getElementById('mynetwork'),
+            document.getElementById('network'),
             data,
             options
         );
