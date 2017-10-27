@@ -9,8 +9,8 @@ import (
 	"io/ioutil"
 )
 
-var Namespace string = "nemventory.product"
-var Mosaic string = "beginners_fishing_rod"
+var Namespace string = "pacnem"
+var Mosaic string = "cheese"
 var depth = 3
 
 func main() {
@@ -34,13 +34,7 @@ type node struct {
 	Label string `json:"label"`
 	Amount int `json:"value"`
 }
-type edges []edge
-type edge struct {
-	From string `json:"from"`
-	To string `json:"to"`
-	Transfer int `json:"value"`
-	Wave int `json:"group"`
-}
+
 
 func run () {
 	var n = network{}
@@ -99,10 +93,11 @@ func (n *network)addNode(address string, wave int) {
 			Label: address,
 			Amount: amount,
 		})
+		//Add Edges
+		n.addEdges(address, amount, wave)
 	}
 
-	//Add Edges
-	n.addEdges(address, amount, wave)
+
 }
 
 func (n *network)addEdges(address string, totalAmountOwn int, wave int){
@@ -115,7 +110,7 @@ func (n *network)addEdges(address string, totalAmountOwn int, wave int){
 			if v.Transaction.OtherTrans.Type == 257 {
 				for _, mosaic := range v.Transaction.OtherTrans.Mosaics {
 					if mosaic.MosaicID.NamespaceID == Namespace && mosaic.MosaicID.Name == Mosaic {
-						n.addEdge(address, v.Transaction.OtherTrans.Recipient, mosaic.Quantity, wave)
+						n.addEdge(address, v.Transaction.OtherTrans.Recipient, mosaic.Quantity, wave, v.Meta.Height)
 						totalAmountSent += mosaic.Quantity
 						fmt.Printf("Sent: %v -> %v (Multisig)\n",mosaic.Quantity, v.Transaction.OtherTrans.Recipient )
 					}
@@ -126,7 +121,7 @@ func (n *network)addEdges(address string, totalAmountOwn int, wave int){
 			if v.Transaction.Type == 257 {
 				for _, mosaic := range v.Transaction.Mosaics {
 					if mosaic.MosaicID.NamespaceID == Namespace && mosaic.MosaicID.Name == Mosaic {
-						n.addEdge(address, v.Transaction.Recipient,mosaic.Quantity, wave)
+						n.addEdge(address, v.Transaction.Recipient,mosaic.Quantity, wave, v.Meta.Height)
 						totalAmountSent += mosaic.Quantity
 						fmt.Printf("Sent: %v -> %v (regular)\n ",mosaic.Quantity, v.Transaction.Recipient )
 					}
@@ -139,13 +134,22 @@ func (n *network)addEdges(address string, totalAmountOwn int, wave int){
 	fmt.Println("")
 }
 
+type edges []edge
+type edge struct {
+	From string `json:"from"`
+	To string `json:"to"`
+	Transfer int `json:"value"`
+	Wave int `json:"group"`
+	BlockHeight int `json:"blockheight"`
+}
 
-func (n *network)addEdge( addressFrom string, addressTo string, amount int, wave int) {
+func (n *network)addEdge( addressFrom string, addressTo string, amount int, wave int, blockHeight int) {
 	n.Edges = append(n.Edges,edge{
 		From: addressFrom,
 		To: addressTo,
 		Transfer: amount,
 		Wave: wave,
+		BlockHeight: blockHeight,
 	})
 }
 
