@@ -9,8 +9,8 @@ import (
 	"io/ioutil"
 )
 
-var Namespace string = "pacnem"
-var Mosaic string = "cheese"
+var Namespace string = "breeze"
+var Mosaic string = "breeze-token"
 var depth = 3
 
 func main() {
@@ -19,9 +19,18 @@ func main() {
 	//runCrawler("nemventory.product", "beginners_fishing_rod")
 	//runCrawler("breeze", "breeze-token")
 	//runCrawler("gold", "gold")
-	run()
 
+	if(len(os.Args) >= 2) {
+		Namespace = os.Args[1]
+		Mosaic = os.Args[2]
+		fmt.Printf("Useing default args %v:%v \n",Namespace,Mosaic)
+	}
+
+	fmt.Printf("Start crawler on %v:%v \n",Namespace,Mosaic)
+	run()
 }
+
+
 
 type network struct {
 	Nodes nodes `json:"nodes"`
@@ -63,7 +72,7 @@ func run () {
 		fmt.Println("Problem when converting result to JSON", err)
 		os.Exit(1)
 	}
-	filename :=  "public/data/"+ Namespace + "-" + Mosaic +".json"
+	filename :=  ""+ Namespace + "-" + Mosaic +".json"
 	err = ioutil.WriteFile(filename, result, 0666)
 	if err != nil {
 		fmt.Println("Problem creating JSON file", err)
